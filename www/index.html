@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Deep-Insights.js | On-Time Performance Rating</title>
+    <meta name=viewport content="width=device-width initial-scale=1">
+    <link rel="stylesheet" href="./dist/themes/css/deep-insights.css" />
+    <script src="./dist/deep-insights.uncompressed.js"></script>
+    <style type="text/css">
+      html, body {
+        position:relative;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      .Layer_selector {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.20);
+        box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.20);
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: 'Open Sans';
+        width: 200px;
+        overflow: hidden;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 2;
+      }
+      .layer-selector-info {
+        padding: 18px 12px;
+      }
+      .layer-selector-item {
+        margin-bottom: 8px;
+        padding: 0 12px;
+        line-height: 25px;
+      }
+      .layer-selector-item:last-child {
+        margin-bottom: 0;
+      }
+      .layer-selector-item {
+        color: #9B9B9B;
+        cursor: pointer;
+      }
+      .layer-selector-item.is-active {
+        color: #222;
+        font-weight: 600;
+      }
+      .layer-selector-item.is-active.routes {
+        color: #9B9B9B !important;
+        cursor: initial !important;
+      }
+      .layer-selector-item > svg {
+        margin-right: 8px;
+        display: inline-block;
+        vertical-align: middle;
+        width: 8px;
+      }
+      .layer-selector-item .tick {
+        fill: #9B9B9B !important;
+      }
+      .layer-selector-item.is-active .tick {
+        fill: #3AA9E3 !important;
+      }
+      .layer-selector-list {
+        border-top: 1px solid rgba(0, 0, 0, 0.07);
+        background: #FAFAFA;
+        padding: 14px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dashboard"></div>
+
+    <div id="cartoselector" class="Layer_selector">
+      <p class="layer-selector-info">Layers</p>
+      <ul class="layer-selector-list">
+        <li data="0" class="layer-selector-item is-active routes">
+          <svg width="10px" height="8px" viewBox="0 0 10 8" version="1.1">
+            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+              <g class="tick" sketch:type="MSArtboardGroup" transform="translate(-279.000000, -196.000000)" fill="#9B9B9B">
+                <g sketch:type="MSLayerGroup" transform="translate(267.000000, 110.000000)">
+                  <g transform="translate(4.000000, 80.000000)" sketch:type="MSShapeGroup">
+                    <path d="M8.11621906,10.9171001 C7.96093673,10.7478742 7.9613534,10.4707122 8.11691353,10.3017882 L9.11666509,9.21502901 C9.27222521,9.04580314 9.5269549,9.04580314 9.68265392,9.21472709 L11.3063127,10.9755215 C11.4620117,11.1444455 11.7164636,11.1441436 11.8718848,10.9749177 L16.3214599,6.12744938 C16.4768811,5.95822351 16.7316108,5.95731775 16.8877265,6.12593978 L17.8824779,7.19941452 C18.0385936,7.36803655 18.039288,7.64429288 17.8838668,7.81366972 L12.488014,13.6921931 C12.3325928,13.861419 12.0255004,14 11.805494,14 L11.3393692,14 C11.1193627,14 10.8125482,13.861117 10.6572659,13.6918912 L8.11621906,10.9171001" id="Rectangle-780-Copy"></path>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </svg> Routes
+        </li>
+
+        <li data="1" class="layer-selector-item is-active airports">
+          <svg width="10px" height="8px" viewBox="0 0 10 8" version="1.1">
+            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+              <g class="tick" sketch:type="MSArtboardGroup" transform="translate(-279.000000, -196.000000)" fill="#9B9B9B">
+                <g sketch:type="MSLayerGroup" transform="translate(267.000000, 110.000000)">
+                  <g transform="translate(4.000000, 80.000000)" sketch:type="MSShapeGroup">
+                    <path d="M8.11621906,10.9171001 C7.96093673,10.7478742 7.9613534,10.4707122 8.11691353,10.3017882 L9.11666509,9.21502901 C9.27222521,9.04580314 9.5269549,9.04580314 9.68265392,9.21472709 L11.3063127,10.9755215 C11.4620117,11.1444455 11.7164636,11.1441436 11.8718848,10.9749177 L16.3214599,6.12744938 C16.4768811,5.95822351 16.7316108,5.95731775 16.8877265,6.12593978 L17.8824779,7.19941452 C18.0385936,7.36803655 18.039288,7.64429288 17.8838668,7.81366972 L12.488014,13.6921931 C12.3325928,13.861419 12.0255004,14 11.805494,14 L11.3393692,14 C11.1193627,14 10.8125482,13.861117 10.6572659,13.6918912 L8.11621906,10.9171001" id="Rectangle-780-Copy"></path>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </svg> Airports
+        </li>
+      </ul>
+    </div>
+
+    <script>
+      window.flights = window.flights || {};
+
+      window.onload = function() {
+        var vizJSON = {
+          "title": "On-Time Performance Rating",
+          "description": "Data from <a href=\"http://www.flightstats.com/go/Home/home.do\">FlightStats</a> and <a href=\"http://openflights.org/data.html\">OpenFlights</a>",
+          "user": {
+            "fullname": "Carlos Matallín",
+            "avatar_url": "https://s3.amazonaws.com/com.cartodb.users-assets.production/production/matallo/assets/20150603150130matallo.jpg"
+          },
+          "updated_at": "2016-02-23T07:56:47+00:00",
+
+          "widgets": [
+            {
+              "id": "avg-rating-formula",
+              "type": "formula",
+              "title": "Avg rating",
+              "layer_id": "a4cbe904-fc9a-4d58-bafe-50f3554faaaa",
+              "options": {
+                "column": "allstars",
+                "operation": "avg",
+                "suffix": " stars"
+              }
+            }, {
+              "id": "rating-histogram",
+              "type": "histogram",
+              "title": "Rating",
+              "layer_id": "a4cbe904-fc9a-4d58-bafe-50f3554faaaa",
+              "options": {
+                "column": "allstars",
+                "bins": 5
+              }
+            }, {
+              "id": "max-delay-formula",
+              "type": "formula",
+              "title": "Max delay",
+              "layer_id": "a4cbe904-fc9a-4d58-bafe-50f3554faaaa",
+              "options": {
+                "column": "delaymax",
+                "operation": "max",
+                "suffix": " minutes",
+                "description": "Maximum delay value observed."
+              }
+            }, {
+              "id": "avg-delay-formula",
+              "type": "formula",
+              "title": "Avg mean delay",
+              "layer_id": "a4cbe904-fc9a-4d58-bafe-50f3554faaaa",
+              "options": {
+                "column": "delaymean",
+                "operation": "avg",
+                "suffix": " minutes",
+                "description": "Average of mean delays."
+              }
+            }, {
+              "id": "departure-category",
+              "type": "category",
+              "title": "Departure city",
+              "layer_id": "a4cbe904-fc9a-4d58-bafe-50f3554faaaa",
+              "options": {
+                "column": "departurecity",
+                "aggregation": "count",
+                "show_stats": true
+              }
+            }, {
+              "id": "airline-category",
+              "type": "category",
+              "title": "Airline",
+              "layer_id": "a4cbe904-fc9a-4d58-bafe-50f3554faaaa",
+              "options": {
+                "column": "name",
+                "aggregation": "count",
+                "show_stats": true
+              }
+            }, {
+              "id": "arrival-category",
+              "type": "category",
+              "title": "Arrival city",
+              "layer_id": "a4cbe904-fc9a-4d58-bafe-50f3554faaaa",
+              "options": {
+                "column": "arrivalcity",
+                "aggregation": "count",
+                "show_stats": true
+              }
+            }
+          ],
+
+          "datasource": {
+            "user_name": "matallo",
+            "maps_api_template": "https://{user}.cartodb.com:443",
+            "force_cors": true, // This is sometimes set in the editor,
+            "stat_tag": "71d401dc-d9b6-11e5-9076-0e3ff518bd15"
+          },
+
+          "id": "71d401dc-d9b6-11e5-9076-0e3ff518bd15",
+          "version": "0.1.0",
+          "likes": 0,
+          "scrollwheel": false,
+          "legends": true,
+          "url": null,
+          "map_provider": "leaflet",
+          "bounds": [
+            [
+              -10.3967,
+              -80.6479
+            ],
+            [
+              60.2137,
+              45.1867
+            ]
+          ],
+          "center": "[40.7127, -74.0059]",
+          "zoom": 4,
+          "updated_at": "2015-10-26T11:50:30+00:00",
+          "layers": [
+            {  
+              "options":{  
+                "visible":true,
+                "type":"Tiled",
+                "name":"Dark matter (lite)",
+                "className":"httpscartodbbasemapssglobalsslfastlynetdark_nolabelszxypng",
+                "base_type":"default",
+                "urlTemplate":"https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png",
+                "minZoom":"0",
+                "maxZoom":"18",
+                "attribution":"&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"http://cartodb.com/attributions\">CartoDB</a>",
+                "subdomains":"abcd",
+                "style":null,
+                "read_only":true,
+                "category":"CartoDB",
+                "order":0,
+                "id":"4b130c82-280c-4b76-9d45-29dc4b9ee395"
+              },
+              "infowindow":null,
+              "tooltip":null,
+              "id":"4b130c82-280c-4b76-9d45-29dc4b9ee395",
+              "order":0,
+              "type":"tiled"
+            }, {
+              "type": "layergroup",
+              "options": {
+                "user_name": "matallo",
+                "maps_api_template": "https://{user}.cartodb.com:443",
+                "layer_definition": {
+                  "stat_tag": "71d401dc-d9b6-11e5-9076-0e3ff518bd15",
+                  "version": "1.0.1",
+                  "layers":[  
+                    {  
+                      "id":"a4cbe904-fc9a-4d58-bafe-50f3554faaaa",
+                      "type":"CartoDB",
+                      "infowindow":{  
+                        "fields":[  
+
+                        ],
+                        "template_name":"table/views/infowindow_light",
+                        "template":"<div class=\"cartodb-popup v2\">\n  <a href=\"#close\" class=\"cartodb-popup-close-button close\">x</a>\n  <div class=\"cartodb-popup-content-wrapper\">\n    <div class=\"cartodb-popup-content\">\n      {{#content.fields}}\n        {{#title}}<h4>{{title}}</h4>{{/title}}\n        {{#value}}\n          <p {{#type}}class=\"{{ type }}\"{{/type}}>{{{ value }}}</p>\n        {{/value}}\n        {{^value}}\n          <p class=\"empty\">null</p>\n        {{/value}}\n      {{/content.fields}}\n    </div>\n  </div>\n  <div class=\"cartodb-popup-tip-container\"></div>\n</div>\n",
+                        "alternative_names":{  
+
+                        },
+                        "width":226,
+                        "maxHeight":180
+                      },
+                      "tooltip":{  
+                        "fields":[
+
+                        ],
+                        "template_name":"tooltip_light",
+                        "template":"<div class=\"cartodb-tooltip-content-wrapper\">\n  <div class=\"cartodb-tooltip-content\">\n  {{#fields}}\n    {{#title}}\n    <h4>{{title}}</h4>\n    {{/title}}\n    <p>{{{ value }}}</p>\n  {{/fields}}\n  </div>\n</div>",
+                        "alternative_names":{  
+
+                        },
+                        "maxHeight":180
+                      },
+                      "legend":{  
+                        "type":"none",
+                        "show_title":false,
+                        "title":"",
+                        "template":"",
+                        "visible":true
+                      },
+                      "order":1,
+                      "visible":true,
+                      "options":{  
+                        "sql":"select * from ratings_copy_1",
+                        "layer_name":"ratings_copy_1",
+                        "cartocss":"/** simple visualization */\n\n#ratings_copy{\n  polygon-opacity: 0;\n   line-color: #d73027;\n  line-width: 0.25;\n  line-opacity: 0.2;\n\n  [zoom>=6]{\n    line-width: 0.5;\n    line-opacity: 0.4;\n  }\n  [zoom>=10]{\n    line-width: 0.75;\n    line-opacity: 0.6;\n  }\n}\n#ratings_copy [ allstars <= 4.9499998] {\n  line-color: #1a9850;\n}\n#ratings_copy [ allstars <= 4.5999999] {\n   line-color: #8cce8a;\n}\n#ratings_copy [ allstars <= 4.25] {\n   line-color: #d2ecb4;\n}\n#ratings_copy [ allstars <= 3.7] {\n   line-color: #fff2cc;\n}\n#ratings_copy [ allstars <= 3.3] {\n   line-color: #fed6b0;\n}\n#ratings_copy [ allstars <= 2.5] {\n   line-color: #f79272;\n}\n#ratings_copy [ allstars <= 1.5] {\n   line-color: #d73027;\n}","cartocss_version":"2.1.1",
+                        "interactivity":"cartodb_id",
+                        "table_name":"\"\"."
+                      }
+                    },
+                    {  
+                      "id":"e130c8bf-c830-4497-932e-788787f54304",
+                      "type":"CartoDB",
+                      "interactivity": "cartodb_id,city",
+                      "infowindow":{  
+                        "fields":[
+
+                        ],
+                        "template_name":"table/views/infowindow_light",
+                        "template":"<div class=\"cartodb-popup v2\">\n  <a href=\"#close\" class=\"cartodb-popup-close-button close\">x</a>\n  <div class=\"cartodb-popup-content-wrapper\">\n    <div class=\"cartodb-popup-content\">\n      {{#content.fields}}\n        {{#title}}<h4>{{title}}</h4>{{/title}}\n        {{#value}}\n          <p {{#type}}class=\"{{ type }}\"{{/type}}>{{{ value }}}</p>\n        {{/value}}\n        {{^value}}\n          <p class=\"empty\">null</p>\n        {{/value}}\n      {{/content.fields}}\n    </div>\n  </div>\n  <div class=\"cartodb-popup-tip-container\"></div>\n</div>\n",
+                        "alternative_names":{  
+
+                        },
+                        "width":226,
+                        "maxHeight":180
+                      },
+                      "tooltip":{  
+                        "fields":[  
+                          {  
+                            "name":"city",
+                            "title":true,
+                            "position":5
+                          }
+                        ],
+                        "template_name":"tooltip_light",
+                        "template": "<div class=\"CDB-Tooltip CDB-Tooltip--isLight\">\n  <div class=\"cartodb-tooltip-content\">\n  {{#fields}}\n    {{#title}}\n    <h4>{{title}}</h4>\n    {{/title}}\n    <p>{{{ value }}}</p>\n  {{/fields}}\n  </div>\n</div>",
+                        "alternative_names":{  
+
+                        },
+                        "maxHeight":180
+                      },
+                      "legend":{  
+                        "type":"none",
+                        "show_title":false,
+                        "title":"",
+                        "template":"",
+                        "visible":true
+                      },
+                      "order":2,
+                      "visible":true,
+                      "options":{  
+                        "sql":"select * from airports",
+                        "layer_name":"airports",
+                        "cartocss":"/** simple visualization */\n\n#airports{\n  marker-fill-opacity: 0.9;\n  marker-line-color: #000000;\n  marker-line-width: 0.25;\n  marker-line-opacity: 0.1;\n  marker-placement: point;\n  marker-type: ellipse;\n  marker-width: 3;\n  marker-fill: #FFFFFF;\n  marker-allow-overlap: true;\n}","cartocss_version":"2.1.1",
+                        "interactivity":"cartodb_id,city",
+                        "table_name":"\"\"."
+                      }
+                    }
+                  ]
+                },
+                "attribution": ""
+              }
+            }
+          ],
+          "overlays": [
+            {
+              "type": "search",
+              "order": 3,
+              "options": {
+                "display": true,
+                "x": 60,
+                "y": 20
+              },
+              "template": ""
+            }, {
+              "type": "zoom",
+              "order": 6,
+              "options": {
+                "display": true,
+                "x": 20,
+                "y": 20
+                },
+              "template": "<div class=\"CDB-Overlay\"><button class=\"CDB-Zoom-action CDB-Zoom-action--out js-zoomOut\"></button><button class=\"CDB-Zoom-action CDB-Zoom-action--in js-zoomIn\"></button></div><div class=\"CDB-Zoom-info js-zoomInfo\">1</div>"
+            }, {
+              "type": "loader",
+              "order": 8,
+              "options": {
+                "display": true,
+                "x": 20,
+                "y": 150
+              },
+              "template": ""
+            }
+          ],
+          "prev": null,
+          "next": null,
+          "transition_options": {
+            "time": 0
+          }
+        };
+
+        var dashboard = cartodb.deepInsights.createDashboard('#dashboard', vizJSON, {
+          no_cdn: false,
+          cartodb_logo: false
+        });
+        dashboard.vis.done(function(v, l) {
+          window.dashboard = dashboard
+
+          var vLayers = v.getLayers()[1]
+          var layers = l.models[1].layers
+
+          window.flights.vLayers = vLayers
+          window.flights.layers = layers
+          window.flights.Lmap = v.getNativeMap()
+
+          window.flights.airports = vLayers.model.layers.models[1]
+          window.flights.airports.set('extra_params', {})
+
+          document.querySelector('.CDB-Map-canvas').appendChild(cdb.$('#cartoselector').get(0));
+
+          cdb.$('li.layer-selector-item').on('click', function (e) {
+            if (cdb.$(e.target).attr('data')=='0') return
+
+            cdb.$(e.target).toggleClass('is-active')
+
+            var show = cdb.$(e.target).hasClass('is-active')
+
+            switch(cdb.$(e.target).attr('data')) {
+              case '0': // routes
+                vLayers.model.layers.models[0].set('visible', show)
+                break
+              case '1': // airports
+                vLayers.model.layers.models[1].set('visible', show);
+                break;
+            }
+          })
+        })
+        .error(function(err) {
+          console.error(err)
+        });
+      }
+    </script>
+  </body>
+</html>
